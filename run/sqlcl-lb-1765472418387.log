@@ -1,0 +1,911 @@
+[2025-12-11 17:00:18] INFO [oracle.dbtools.raptor.scriptrunner.commands.liquibase.LbCommand handleEvent] Starting LB command: UPDATE
+[2025-12-11 17:00:18] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing with the 'SqlCl-jdbc' executor
+[2025-12-11 17:00:19] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing sql 
+CREATE TABLE "WKSP_DEMO"."DATABASECHANGELOG_ACTIONS" 
+   (	"ID" VARCHAR2(255) NOT NULL ENABLE,
+	"SEQUENCE" NUMBER NOT NULL ENABLE,
+	"SQL" CLOB,
+	"SXML" CLOB,
+	"AUTHOR" VARCHAR2(255),
+	"FILENAME" VARCHAR2(255),
+	"DEPLOYMENT_ID" VARCHAR2(10),
+	"STATUS" VARCHAR2(20)
+   )
+[2025-12-11 17:00:19] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing with the 'SqlCl-jdbc' executor
+[2025-12-11 17:00:19] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing sql 
+ALTER TABLE WKSP_DEMO.DATABASECHANGELOG_ACTIONS ADD  CONSTRAINT DATABASECHANGELOG_ACTIONS_PK PRIMARY KEY (id,author,filename,sequence);
+[2025-12-11 17:00:19] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing with the 'SqlCl-jdbc' executor
+[2025-12-11 17:00:19] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing sql 
+--create log table trigger
+CREATE OR REPLACE TRIGGER WKSP_DEMO.DATABASECHANGELOG_ACTIONS_TRG BEFORE
+    INSERT ON WKSP_DEMO.DATABASECHANGELOG_ACTIONS
+    FOR EACH ROW
+DECLARE
+    new_seq  NUMBER;
+BEGIN
+    SELECT
+        nvl(MAX(sequence + 1), 0)
+    INTO new_seq
+    FROM
+        WKSP_DEMO.DATABASECHANGELOG_ACTIONS
+    WHERE
+            id = :new.id
+        AND author = :new.author
+        AND filename = :new.filename;
+
+    :new.sequence := new_seq;
+END;
+/
+-- end trigger
+[2025-12-11 17:00:19] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing with the 'SqlCl-jdbc' executor
+[2025-12-11 17:00:19] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing sql 
+CREATE OR REPLACE FORCE EDITIONABLE VIEW "WKSP_DEMO"."DATABASECHANGELOG_DETAILS" 
+ ( "DEPLOYMENT_ID", "ID", "AUTHOR", "FILENAME", "SQL", "SXML", "DATEEXECUTED", "EXECTYPE", "MD5SUM", "DESCRIPTION", "COMMENTS", "LIQUIBASE", "CONTEXTS", "LABELS"
+  )  AS 
+  SELECT  da.deployment_id,    da.id,    da.author,    da.filename,  da.sql,     da.sxml,    d.dateexecuted,    d.exectype,    d.md5sum,  d.description,    d.comments,    d.liquibase,    d.contexts,    d.labels 
+FROM WKSP_DEMO.DATABASECHANGELOG d   LEFT JOIN WKSP_DEMO.DATABASECHANGELOG_ACTIONS da ON d.id = da.id AND d.author = da.author AND d.filename = da.filename ORDER BY   1,7
+[2025-12-11 17:00:21] INFO [liquibase.changelog] Creating database history table with name: WKSP_DEMO.DATABASECHANGELOG
+[2025-12-11 17:00:22] INFO [liquibase.changelog] Reading from WKSP_DEMO.DATABASECHANGELOG
+[2025-12-11 17:00:23] INFO [liquibase.snapshot] Creating snapshot
+[2025-12-11 17:00:25] INFO [liquibase.lockservice] Successfully acquired change log lock
+[2025-12-11 17:00:25] INFO [liquibase.command] Using deploymentId: 5472425840
+[2025-12-11 17:00:25] INFO [liquibase.changelog] Reading from WKSP_DEMO.DATABASECHANGELOG
+[2025-12-11 17:00:25] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing with the 'SqlCl-jdbc' executor
+[2025-12-11 17:00:25] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing sql 
+-- Logging Oracle Liquibase Extension actions to WKSP_DEMO.DATABASECHANGELOG_ACTIONS
+ DECLARE 
+ id varchar2(2000) := '1765472152090';
+ status varchar2(2000) := 'PREPARING';
+ rawAction clob;
+ rawSxml clob;
+ myrow varchar2(2000);
+ action clob := '';
+ sxml clob := '';
+ dep varchar2(2000) := '5472425840';
+ author varchar2(2000) := 'WKSP_DEMO';
+ filename varchar2(2000) := 'release_base_1.0/wksp_demo/package_specs/eba_demo_data_load.sql';
+ insertlog varchar2(2000) := 'insert into WKSP_DEMO.DATABASECHANGELOG_ACTIONS (id,author,filename,sql,sxml,deployment_id,status) values (:id,:author,:filename,:action,:sxml,:dep,:status) returning rowid into :out';
+ updateaction varchar2(2000) := 'update WKSP_DEMO.DATABASECHANGELOG_ACTIONS set sql = sql ||:action where rowid = :myrow ';
+ updatesxml varchar2(2000) := 'update WKSP_DEMO.DATABASECHANGELOG_ACTIONS set sxml = sxml ||:sxml where rowid = :myrow ';
+ begin 
+action := utl_raw.cast_to_varchar2(utl_encode.base64_decode(utl_raw.cast_to_raw(q'{LS0gc3FsY2xfc25hcHNob3Qgc3JjL2RhdGFiYXNlL3drc3BfZGVtby9wYWNrYWdlX3NwZWNzL2ViYV9kZW1vX2RhdGFfbG9hZC5zcWw6bnVsbDozODcxMmNlN2E2NTA0NDEzNTRlMGQyZGY1NjYxYTZmZDcxYTlkYjBkOmNyZWF0ZQoKY3JlYXRlIG9yIHJlcGxhY2UgcGFja2FnZSBlYmFfZGVtb19kYXRhX2xvYWQgYXMKICAgIHByb2NlZHVyZSByZXNldF9zYW1wbGU7CgogICAgZnVuY3Rpb24gemlwX3RvX2NzdiAoCiAgICAgICAgcF9ibG9iX2NvbnRlbnQgaW4gYmxvYiwKICAgICAgICBwX21pbWVfdHlwZSAgICBpbiB2YXJjaGFyMgogICAgKSByZXR1cm4gYmxvYjsKCiAgICBwcm9jZWR1cmUgc2V0X2ZpbGVfYmxvYiAoCiAgICAgICAgcF9ibG9iIGluIGJsb2IKICAgICk7CgogICAgZnVuY3Rpb24gZ2V0X2ZpbGVfYmxvYiByZXR1cm4gYmxvYjsKCmVuZCBlYmFfZGVtb19kYXRhX2xvYWQ7Ci8=}')));
+ execute immediate insertlog using id,author,filename,action,sxml,dep,status returning into myrow;
+end;
+[2025-12-11 17:00:27] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing with the 'SqlCl-jdbc' executor
+[2025-12-11 17:00:27] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing sql 
+-- sqlcl_snapshot src/database/wksp_demo/package_specs/eba_demo_data_load.sql:null:38712ce7a650441354e0d2df5661a6fd71a9db0d:create
+
+create or replace package eba_demo_data_load as
+    procedure reset_sample;
+
+    function zip_to_csv (
+        p_blob_content in blob,
+        p_mime_type    in varchar2
+    ) return blob;
+
+    procedure set_file_blob (
+        p_blob in blob
+    );
+
+    function get_file_blob return blob;
+
+end eba_demo_data_load;
+[2025-12-11 17:00:27] INFO [liquibase.changelog] Custom SQL executed
+[2025-12-11 17:00:27] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing with the 'SqlCl-jdbc' executor
+[2025-12-11 17:00:27] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing sql 
+update WKSP_DEMO.DATABASECHANGELOG_ACTIONS set status = 'RAN' where id = '1765472152090' and status != 'FAILED'  and sequence = (select max(sequence) from WKSP_DEMO.DATABASECHANGELOG_ACTIONS where id = '1765472152090')
+[2025-12-11 17:00:27] INFO [liquibase.changelog] ChangeSet release_base_1.0/wksp_demo/package_specs/eba_demo_data_load.sql::1765472152090::WKSP_DEMO ran successfully in 1495ms
+[2025-12-11 17:00:27] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing with the 'SqlCl-jdbc' executor
+[2025-12-11 17:00:27] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing sql 
+-- Logging Oracle Liquibase Extension actions to WKSP_DEMO.DATABASECHANGELOG_ACTIONS
+ DECLARE 
+ id varchar2(2000) := '1765472152244';
+ status varchar2(2000) := 'PREPARING';
+ rawAction clob;
+ rawSxml clob;
+ myrow varchar2(2000);
+ action clob := '';
+ sxml clob := '';
+ dep varchar2(2000) := '5472425840';
+ author varchar2(2000) := 'WKSP_DEMO';
+ filename varchar2(2000) := 'release_base_1.0/wksp_demo/tables/eba_demo_load_dept.sql';
+ insertlog varchar2(2000) := 'insert into WKSP_DEMO.DATABASECHANGELOG_ACTIONS (id,author,filename,sql,sxml,deployment_id,status) values (:id,:author,:filename,:action,:sxml,:dep,:status) returning rowid into :out';
+ updateaction varchar2(2000) := 'update WKSP_DEMO.DATABASECHANGELOG_ACTIONS set sql = sql ||:action where rowid = :myrow ';
+ updatesxml varchar2(2000) := 'update WKSP_DEMO.DATABASECHANGELOG_ACTIONS set sxml = sxml ||:sxml where rowid = :myrow ';
+ begin 
+action := utl_raw.cast_to_varchar2(utl_encode.base64_decode(utl_raw.cast_to_raw(q'{LS0gc3FsY2xfc25hcHNob3Qgc3JjL2RhdGFiYXNlL3drc3BfZGVtby90YWJsZXMvZWJhX2RlbW9fbG9hZF9kZXB0LnNxbDpudWxsOjJjM2I5MWJjNDA0YWY5YjAxNjNjMDVhNmU3ZDAyOWViZmU2OWQ0MjI6Y3JlYXRlCgpjcmVhdGUgdGFibGUgZWJhX2RlbW9fbG9hZF9kZXB0ICgKICAgIGRlcHRubyBudW1iZXIoMiwgMCksCiAgICBkbmFtZSAgdmFyY2hhcjIoMTQgYnl0ZSksCiAgICBsb2MgICAgdmFyY2hhcjIoMTMgYnl0ZSkKKTsKCmFsdGVyIHRhYmxlIGViYV9kZW1vX2xvYWRfZGVwdCBhZGQgcHJpbWFyeSBrZXkgKCBkZXB0bm8gKQogICAgdXNpbmcgaW5kZXggZW5hYmxlOw==}')));
+ execute immediate insertlog using id,author,filename,action,sxml,dep,status returning into myrow;
+end;
+[2025-12-11 17:00:27] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing with the 'SqlCl-jdbc' executor
+[2025-12-11 17:00:27] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing sql 
+-- sqlcl_snapshot src/database/wksp_demo/tables/eba_demo_load_dept.sql:null:2c3b91bc404af9b0163c05a6e7d029ebfe69d422:create
+
+create table eba_demo_load_dept (
+    deptno number(2, 0),
+    dname  varchar2(14 byte),
+    loc    varchar2(13 byte)
+);
+
+alter table eba_demo_load_dept add primary key ( deptno )
+    using index enable;
+[2025-12-11 17:00:27] INFO [liquibase.changelog] Custom SQL executed
+[2025-12-11 17:00:27] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing with the 'SqlCl-jdbc' executor
+[2025-12-11 17:00:27] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing sql 
+update WKSP_DEMO.DATABASECHANGELOG_ACTIONS set status = 'RAN' where id = '1765472152244' and status != 'FAILED'  and sequence = (select max(sequence) from WKSP_DEMO.DATABASECHANGELOG_ACTIONS where id = '1765472152244')
+[2025-12-11 17:00:27] INFO [liquibase.changelog] ChangeSet release_base_1.0/wksp_demo/tables/eba_demo_load_dept.sql::1765472152244::WKSP_DEMO ran successfully in 172ms
+[2025-12-11 17:00:27] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing with the 'SqlCl-jdbc' executor
+[2025-12-11 17:00:27] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing sql 
+-- Logging Oracle Liquibase Extension actions to WKSP_DEMO.DATABASECHANGELOG_ACTIONS
+ DECLARE 
+ id varchar2(2000) := '1765472152333';
+ status varchar2(2000) := 'PREPARING';
+ rawAction clob;
+ rawSxml clob;
+ myrow varchar2(2000);
+ action clob := '';
+ sxml clob := '';
+ dep varchar2(2000) := '5472425840';
+ author varchar2(2000) := 'WKSP_DEMO';
+ filename varchar2(2000) := 'release_base_1.0/wksp_demo/tables/eba_demo_load_emp.sql';
+ insertlog varchar2(2000) := 'insert into WKSP_DEMO.DATABASECHANGELOG_ACTIONS (id,author,filename,sql,sxml,deployment_id,status) values (:id,:author,:filename,:action,:sxml,:dep,:status) returning rowid into :out';
+ updateaction varchar2(2000) := 'update WKSP_DEMO.DATABASECHANGELOG_ACTIONS set sql = sql ||:action where rowid = :myrow ';
+ updatesxml varchar2(2000) := 'update WKSP_DEMO.DATABASECHANGELOG_ACTIONS set sxml = sxml ||:sxml where rowid = :myrow ';
+ begin 
+action := utl_raw.cast_to_varchar2(utl_encode.base64_decode(utl_raw.cast_to_raw(q'{LS0gc3FsY2xfc25hcHNob3Qgc3JjL2RhdGFiYXNlL3drc3BfZGVtby90YWJsZXMvZWJhX2RlbW9fbG9hZF9lbXAuc3FsOm51bGw6ZDhmZmU2N2M2NDM5NjZlOTg3ZjU5OWEyMTcyMTI4Y2ViMDEyMTU5MDpjcmVhdGUKCmNyZWF0ZSB0YWJsZSBlYmFfZGVtb19sb2FkX2VtcCAoCiAgICBlbXBubyAgICAgICAgbnVtYmVyKDQsIDApIG5vdCBudWxsIGVuYWJsZSwKICAgIGVuYW1lICAgICAgICB2YXJjaGFyMigxMCBieXRlKSwKICAgIGpvYiAgICAgICAgICB2YXJjaGFyMigxMCBieXRlKSwKICAgIG1nciAgICAgICAgICBudW1iZXIoNCwgMCksCiAgICBoaXJlZGF0ZSAgICAgZGF0ZSwKICAgIHNhbCAgICAgICAgICBudW1iZXIoNywgMiksCiAgICBjb21tICAgICAgICAgbnVtYmVyKDcsIDIpLAogICAgZGVwdG5vICAgICAgIG51bWJlcigyLCAwKSwKICAgIGNyZWF0ZWQgICAgICBkYXRlLAogICAgbGFzdF91cGRhdGVkIGRhdGUKKTsKCmFsdGVyIHRhYmxlIGViYV9kZW1vX2xvYWRfZW1wIGFkZCBwcmltYXJ5IGtleSAoIGVtcG5vICkKICAgIHVzaW5nIGluZGV4IGVuYWJsZTs=}')));
+ execute immediate insertlog using id,author,filename,action,sxml,dep,status returning into myrow;
+end;
+[2025-12-11 17:00:27] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing with the 'SqlCl-jdbc' executor
+[2025-12-11 17:00:27] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing sql 
+-- sqlcl_snapshot src/database/wksp_demo/tables/eba_demo_load_emp.sql:null:d8ffe67c643966e987f599a2172128ceb0121590:create
+
+create table eba_demo_load_emp (
+    empno        number(4, 0) not null enable,
+    ename        varchar2(10 byte),
+    job          varchar2(10 byte),
+    mgr          number(4, 0),
+    hiredate     date,
+    sal          number(7, 2),
+    comm         number(7, 2),
+    deptno       number(2, 0),
+    created      date,
+    last_updated date
+);
+
+alter table eba_demo_load_emp add primary key ( empno )
+    using index enable;
+[2025-12-11 17:00:27] INFO [liquibase.changelog] Custom SQL executed
+[2025-12-11 17:00:27] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing with the 'SqlCl-jdbc' executor
+[2025-12-11 17:00:27] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing sql 
+update WKSP_DEMO.DATABASECHANGELOG_ACTIONS set status = 'RAN' where id = '1765472152333' and status != 'FAILED'  and sequence = (select max(sequence) from WKSP_DEMO.DATABASECHANGELOG_ACTIONS where id = '1765472152333')
+[2025-12-11 17:00:27] INFO [liquibase.changelog] ChangeSet release_base_1.0/wksp_demo/tables/eba_demo_load_emp.sql::1765472152333::WKSP_DEMO ran successfully in 163ms
+[2025-12-11 17:00:27] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing with the 'SqlCl-jdbc' executor
+[2025-12-11 17:00:27] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing sql 
+-- Logging Oracle Liquibase Extension actions to WKSP_DEMO.DATABASECHANGELOG_ACTIONS
+ DECLARE 
+ id varchar2(2000) := '1765472152420';
+ status varchar2(2000) := 'PREPARING';
+ rawAction clob;
+ rawSxml clob;
+ myrow varchar2(2000);
+ action clob := '';
+ sxml clob := '';
+ dep varchar2(2000) := '5472425840';
+ author varchar2(2000) := 'WKSP_DEMO';
+ filename varchar2(2000) := 'release_base_1.0/wksp_demo/tables/eba_demo_load_emp_err$.sql';
+ insertlog varchar2(2000) := 'insert into WKSP_DEMO.DATABASECHANGELOG_ACTIONS (id,author,filename,sql,sxml,deployment_id,status) values (:id,:author,:filename,:action,:sxml,:dep,:status) returning rowid into :out';
+ updateaction varchar2(2000) := 'update WKSP_DEMO.DATABASECHANGELOG_ACTIONS set sql = sql ||:action where rowid = :myrow ';
+ updatesxml varchar2(2000) := 'update WKSP_DEMO.DATABASECHANGELOG_ACTIONS set sxml = sxml ||:sxml where rowid = :myrow ';
+ begin 
+action := utl_raw.cast_to_varchar2(utl_encode.base64_decode(utl_raw.cast_to_raw(q'{LS0gc3FsY2xfc25hcHNob3Qgc3JjL2RhdGFiYXNlL3drc3BfZGVtby90YWJsZXMvZWJhX2RlbW9fbG9hZF9lbXBfZXJyJC5zcWw6bnVsbDozMTBiZDYxNWM2YWNlMWY3NDgwMDIyMjcxODVjN2NmYmZmZjUyOGFjOmNyZWF0ZQoKY3JlYXRlIHRhYmxlIGViYV9kZW1vX2xvYWRfZW1wX2VyciQgKAogICAgb3JhX2Vycl9udW1iZXIkIG51bWJlciwKICAgIG9yYV9lcnJfbWVzZyQgICB2YXJjaGFyMigyMDAwIGJ5dGUpLAogICAgb3JhX2Vycl9yb3dpZCQgIHVyb3dpZCg0MDAwKSwKICAgIG9yYV9lcnJfb3B0eXAkICB2YXJjaGFyMigyIGJ5dGUpLAogICAgb3JhX2Vycl90YWckICAgIHZhcmNoYXIyKDIwMDAgYnl0ZSksCiAgICBlbXBubyAgICAgICAgICAgdmFyY2hhcjIoNDAwMCBieXRlKSwKICAgIGVuYW1lICAgICAgICAgICB2YXJjaGFyMigzMjc2NyBieXRlKSwKICAgIGpvYiAgICAgICAgICAgICB2YXJjaGFyMigzMjc2NyBieXRlKSwKICAgIG1nciAgICAgICAgICAgICB2YXJjaGFyMig0MDAwIGJ5dGUpLAogICAgaGlyZWRhdGUgICAgICAgIHZhcmNoYXIyKDQwMDAgYnl0ZSksCiAgICBzYWwgICAgICAgICAgICAgdmFyY2hhcjIoNDAwMCBieXRlKSwKICAgIGNvbW0gICAgICAgICAgICB2YXJjaGFyMig0MDAwIGJ5dGUpLAogICAgZGVwdG5vICAgICAgICAgIHZhcmNoYXIyKDQwMDAgYnl0ZSksCiAgICBjcmVhdGVkICAgICAgICAgdmFyY2hhcjIoNDAwMCBieXRlKSwKICAgIGxhc3RfdXBkYXRlZCAgICB2YXJjaGFyMig0MDAwIGJ5dGUpCik7}')));
+ execute immediate insertlog using id,author,filename,action,sxml,dep,status returning into myrow;
+end;
+[2025-12-11 17:00:27] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing with the 'SqlCl-jdbc' executor
+[2025-12-11 17:00:27] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing sql 
+-- sqlcl_snapshot src/database/wksp_demo/tables/eba_demo_load_emp_err$.sql:null:310bd615c6ace1f748002227185c7cfbfff528ac:create
+
+create table eba_demo_load_emp_err$ (
+    ora_err_number$ number,
+    ora_err_mesg$   varchar2(2000 byte),
+    ora_err_rowid$  urowid(4000),
+    ora_err_optyp$  varchar2(2 byte),
+    ora_err_tag$    varchar2(2000 byte),
+    empno           varchar2(4000 byte),
+    ename           varchar2(32767 byte),
+    job             varchar2(32767 byte),
+    mgr             varchar2(4000 byte),
+    hiredate        varchar2(4000 byte),
+    sal             varchar2(4000 byte),
+    comm            varchar2(4000 byte),
+    deptno          varchar2(4000 byte),
+    created         varchar2(4000 byte),
+    last_updated    varchar2(4000 byte)
+);
+[2025-12-11 17:00:27] INFO [liquibase.changelog] Custom SQL executed
+[2025-12-11 17:00:27] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing with the 'SqlCl-jdbc' executor
+[2025-12-11 17:00:27] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing sql 
+update WKSP_DEMO.DATABASECHANGELOG_ACTIONS set status = 'RAN' where id = '1765472152420' and status != 'FAILED'  and sequence = (select max(sequence) from WKSP_DEMO.DATABASECHANGELOG_ACTIONS where id = '1765472152420')
+[2025-12-11 17:00:27] INFO [liquibase.changelog] ChangeSet release_base_1.0/wksp_demo/tables/eba_demo_load_emp_err$.sql::1765472152420::WKSP_DEMO ran successfully in 136ms
+[2025-12-11 17:00:27] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing with the 'SqlCl-jdbc' executor
+[2025-12-11 17:00:27] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing sql 
+-- Logging Oracle Liquibase Extension actions to WKSP_DEMO.DATABASECHANGELOG_ACTIONS
+ DECLARE 
+ id varchar2(2000) := '1765472152480';
+ status varchar2(2000) := 'PREPARING';
+ rawAction clob;
+ rawSxml clob;
+ myrow varchar2(2000);
+ action clob := '';
+ sxml clob := '';
+ dep varchar2(2000) := '5472425840';
+ author varchar2(2000) := 'WKSP_DEMO';
+ filename varchar2(2000) := 'release_base_1.0/wksp_demo/tables/eba_demo_load_sales.sql';
+ insertlog varchar2(2000) := 'insert into WKSP_DEMO.DATABASECHANGELOG_ACTIONS (id,author,filename,sql,sxml,deployment_id,status) values (:id,:author,:filename,:action,:sxml,:dep,:status) returning rowid into :out';
+ updateaction varchar2(2000) := 'update WKSP_DEMO.DATABASECHANGELOG_ACTIONS set sql = sql ||:action where rowid = :myrow ';
+ updatesxml varchar2(2000) := 'update WKSP_DEMO.DATABASECHANGELOG_ACTIONS set sxml = sxml ||:sxml where rowid = :myrow ';
+ begin 
+action := utl_raw.cast_to_varchar2(utl_encode.base64_decode(utl_raw.cast_to_raw(q'{LS0gc3FsY2xfc25hcHNob3Qgc3JjL2RhdGFiYXNlL3drc3BfZGVtby90YWJsZXMvZWJhX2RlbW9fbG9hZF9zYWxlcy5zcWw6bnVsbDpkZWJkOTUxZDdkMWJjODRiMDlhNjQxYTk1MjY2ZDU3MDJjMWM4NWY3OmNyZWF0ZQoKY3JlYXRlIHRhYmxlIGViYV9kZW1vX2xvYWRfc2FsZXMgKAogICAgaWQgICAgICAgICAgICAgbnVtYmVyIGdlbmVyYXRlZCBieSBkZWZhdWx0IG9uIG51bGwgYXMgaWRlbnRpdHkgbm90IG51bGwgZW5hYmxlLAogICAgcmVnaW9uICAgICAgICAgdmFyY2hhcjIoMjU1IGJ5dGUpLAogICAgY291bnRyeSAgICAgICAgdmFyY2hhcjIoMjU1IGJ5dGUpLAogICAgaXRlbV90eXBlICAgICAgdmFyY2hhcjIoNTAgYnl0ZSksCiAgICBzYWxlc19jaGFubmVsICB2YXJjaGFyMig1MCBieXRlKSwKICAgIG9yZGVyX3ByaW9yaXR5IHZhcmNoYXIyKDEgYnl0ZSksCiAgICBvcmRlcl9kYXRlICAgICBkYXRlLAogICAgb3JkZXJfaWQgICAgICAgbnVtYmVyLAogICAgc2hpcF9kYXRlICAgICAgZGF0ZSwKICAgIHVuaXRzX3NvbGQgICAgIG51bWJlciwKICAgIHVuaXRfcHJpY2UgICAgIG51bWJlciwKICAgIHVuaXRfY29zdCAgICAgIG51bWJlciwKICAgIHRvdGFsX3JldmVudWUgIG51bWJlciwKICAgIHRvdGFsX2Nvc3QgICAgIG51bWJlciwKICAgIHRvdGFsX3Byb2ZpdCAgIG51bWJlciwKICAgIGNyZWF0ZWQgICAgICAgIGRhdGUsCiAgICBsYXN0X3VwZGF0ZWQgICBkYXRlCik7CgphbHRlciB0YWJsZSBlYmFfZGVtb19sb2FkX3NhbGVzIGFkZCBwcmltYXJ5IGtleSAoIGlkICkKICAgIHVzaW5nIGluZGV4IGVuYWJsZTs=}')));
+ execute immediate insertlog using id,author,filename,action,sxml,dep,status returning into myrow;
+end;
+[2025-12-11 17:00:28] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing with the 'SqlCl-jdbc' executor
+[2025-12-11 17:00:28] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing sql 
+-- sqlcl_snapshot src/database/wksp_demo/tables/eba_demo_load_sales.sql:null:debd951d7d1bc84b09a641a95266d5702c1c85f7:create
+
+create table eba_demo_load_sales (
+    id             number generated by default on null as identity not null enable,
+    region         varchar2(255 byte),
+    country        varchar2(255 byte),
+    item_type      varchar2(50 byte),
+    sales_channel  varchar2(50 byte),
+    order_priority varchar2(1 byte),
+    order_date     date,
+    order_id       number,
+    ship_date      date,
+    units_sold     number,
+    unit_price     number,
+    unit_cost      number,
+    total_revenue  number,
+    total_cost     number,
+    total_profit   number,
+    created        date,
+    last_updated   date
+);
+
+alter table eba_demo_load_sales add primary key ( id )
+    using index enable;
+[2025-12-11 17:00:28] INFO [liquibase.changelog] Custom SQL executed
+[2025-12-11 17:00:28] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing with the 'SqlCl-jdbc' executor
+[2025-12-11 17:00:28] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing sql 
+update WKSP_DEMO.DATABASECHANGELOG_ACTIONS set status = 'RAN' where id = '1765472152480' and status != 'FAILED'  and sequence = (select max(sequence) from WKSP_DEMO.DATABASECHANGELOG_ACTIONS where id = '1765472152480')
+[2025-12-11 17:00:28] INFO [liquibase.changelog] ChangeSet release_base_1.0/wksp_demo/tables/eba_demo_load_sales.sql::1765472152480::WKSP_DEMO ran successfully in 250ms
+[2025-12-11 17:00:28] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing with the 'SqlCl-jdbc' executor
+[2025-12-11 17:00:28] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing sql 
+-- Logging Oracle Liquibase Extension actions to WKSP_DEMO.DATABASECHANGELOG_ACTIONS
+ DECLARE 
+ id varchar2(2000) := '1765472152047';
+ status varchar2(2000) := 'PREPARING';
+ rawAction clob;
+ rawSxml clob;
+ myrow varchar2(2000);
+ action clob := '';
+ sxml clob := '';
+ dep varchar2(2000) := '5472425840';
+ author varchar2(2000) := 'WKSP_DEMO';
+ filename varchar2(2000) := 'release_base_1.0/wksp_demo/package_bodies/eba_demo_data_load.sql';
+ insertlog varchar2(2000) := 'insert into WKSP_DEMO.DATABASECHANGELOG_ACTIONS (id,author,filename,sql,sxml,deployment_id,status) values (:id,:author,:filename,:action,:sxml,:dep,:status) returning rowid into :out';
+ updateaction varchar2(2000) := 'update WKSP_DEMO.DATABASECHANGELOG_ACTIONS set sql = sql ||:action where rowid = :myrow ';
+ updatesxml varchar2(2000) := 'update WKSP_DEMO.DATABASECHANGELOG_ACTIONS set sxml = sxml ||:sxml where rowid = :myrow ';
+ begin 
+action := utl_raw.cast_to_varchar2(utl_encode.base64_decode(utl_raw.cast_to_raw(q'{LS0gc3FsY2xfc25hcHNob3Qgc3JjL2RhdGFiYXNlL3drc3BfZGVtby9wYWNrYWdlX2JvZGllcy9lYmFfZGVtb19kYXRhX2xvYWQuc3FsOm51bGw6ZjIyYzI4NWRmOGQ3ZmI1M2Q2NjI2YmY4MjU2NWQzYmVmYjE5NTVjNjpjcmVhdGUKCmNyZWF0ZSBvciByZXBsYWNlIHBhY2thZ2UgYm9keSBlYmFfZGVtb19kYXRhX2xvYWQgYXMKCiAgICAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQogICAgLS0gZ2xvYmFsIHZhcmlhYmxlIHRvIGhvbGQgdGhlIENTViBjb250ZW50cyBiZWluZyBleHRyYWN0ZWQgZnJvbSB0aGUgdXBsb2FkZWQKICAgIC0tIFpJUCBhcmNoaXZlOyBzZWUgcGFnZSAxNy4KICAgIC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tCiAgICBnX2N1cnJlbnRfYmxvYiAgICAgICAgIGJsb2I7CgogICAgLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KICAgIC0tIGNvbnN0YW50cwogICAgLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KICAgIGNfbWltZV9hcHBsaWNhdGlvbl96aXAgY29uc3RhbnQgdmFyY2hhcjIoMzApIDo9ICdhcHBsaWNhdGlvbi96aXAnOwoKICAgIC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tCiAgICAtLSByZXNldHMgYWxsIHNhbXBsZSB0YWJsZXMKICAgIC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tCiAgICBwcm9jZWR1cmUgcmVzZXRfc2FtcGxlIGlzCiAgICBiZWdpbgogICAgICAgIGRlbGV0ZSBlYmFfZGVtb19sb2FkX2VtcDsKCiAgICAgICAgZGVsZXRlIGViYV9kZW1vX2xvYWRfZGVwdDsKCiAgICAgICAgZGVsZXRlIGViYV9kZW1vX2xvYWRfZW1wX2VyciQ7CgogICAgICAgIGluc2VydCBpbnRvIGViYV9kZW1vX2xvYWRfZGVwdCAoCiAgICAgICAgICAgIGRlcHRubywKICAgICAgICAgICAgZG5hbWUsCiAgICAgICAgICAgIGxvYwogICAgICAgICkgdmFsdWVzICggMTAsCiAgICAgICAgICAgICAgICAgICAnQUNDT1VOVElORycsCiAgICAgICAgICAgICAgICAgICAnTkVXIFlPUksnICk7CgogICAgICAgIGluc2VydCBpbnRvIGViYV9kZW1vX2xvYWRfZGVwdCAoCiAgICAgICAgICAgIGRlcHRubywKICAgICAgICAgICAgZG5hbWUsCiAgICAgICAgICAgIGxvYwogICAgICAgICkgdmFsdWVzICggMjAsCiAgICAgICAgICAgICAgICAgICAnUkVTRUFSQ0gnLAogICAgICAgICAgICAgICAgICAgJ0RBTExBUycgKTsKCiAgICAgICAgaW5zZXJ0IGludG8gZWJhX2RlbW9fbG9hZF9kZXB0ICgKICAgICAgICAgICAgZGVwdG5vLAogICAgICAgICAgICBkbmFtZSwKICAgICAgICAgICAgbG9jCiAgICAgICAgKSB2YWx1ZXMgKCAzMCwKICAgICAgICAgICAgICAgICAgICdTQUxFUycsCiAgICAgICAgICAgICAgICAgICAnQ0hJQ0FHTycgKTsKCiAgICAgICAgaW5zZXJ0IGludG8gZWJhX2RlbW9fbG9hZF9kZXB0ICgKICAgICAgICAgICAgZGVwdG5vLAogICAgICAgICAgICBkbmFtZSwKICAgICAgICAgICAgbG9jCiAgICAgICAgKSB2YWx1ZXMgKCA0MCwKICAgICAgICAgICAgICAgICAgICdPUEVSQVRJT05TJywKICAgICAgICAgICAgICAgICAgICdCT1NUT04nICk7CgogICAgICAgIGluc2VydCBpbnRvIGViYV9kZW1vX2xvYWRfZW1wICgKICAgICAgICAgICAgZW1wbm8sCiAgICAgICAgICAgIGVuYW1lLAogICAgICAgICAgICBqb2IsCiAgICAgICAgICAgIG1nciwKICAgICAgICAgICAgaGlyZWRhdGUsCiAgICAgICAgICAgIHNhbCwKICAgICAgICAgICAgY29tbSwKICAgICAgICAgICAgZGVwdG5vCiAgICAgICAgKSB2YWx1ZXMgKCA3ODM5LAogICAgICAgICAgICAgICAgICAgJ0tJTkcnLAogICAgICAgICAgICAgICAgICAgJ1BSRVNJREVOVCcsCiAgICAgICAgICAgICAgICAgICBudWxsLAogICAgICAgICAgICAgICAgICAgdG9fZGF0ZSgnMTctMTEtODEnLCAnREQtTU0tUlInKSwKICAgICAgICAgICAgICAgICAgIDUwMDAsCiAgICAgICAgICAgICAgICAgICBudWxsLAogICAgICAgICAgICAgICAgICAgMTAgKTsKCiAgICAgICAgaW5zZXJ0IGludG8gZWJhX2RlbW9fbG9hZF9lbXAgKAogICAgICAgICAgICBlbXBubywKICAgICAgICAgICAgZW5hbWUsCiAgICAgICAgICAgIGpvYiwKICAgICAgICAgICAgbWdyLAogICAgICAgICAgICBoaXJlZGF0ZSwKICAgICAgICAgICAgc2FsLAogICAgICAgICAgICBjb21tLAogICAgICAgICAgICBkZXB0bm8KICAgICAgICApIHZhbHVlcyAoIDc2OTgsCiAgICAgICAgICAgICAgICAgICAnQkxBS0UnLAogICAgICAgICAgICAgICAgICAgJ01BTkFHRVInLAogICAgICAgICAgICAgICAgICAgNzgzOSwKICAgICAgICAgICAgICAgICAgIHRvX2RhdGUoJzAxLTA1LTgxJywgJ0RELU1NLVJSJyksCiAgICAgICAgICAgICAgICAgICAyODUwLAogICAgICAgICAgICAgICAgICAgbnVsbCwKICAgICAgICAgICAgICAgICAgIDMwICk7CgogICAgICAgIGluc2VydCBpbnRvIGViYV9kZW1vX2xvYWRfZW1wICgKICAgICAgICAgICAgZW1wbm8sCiAgICAgICAgICAgIGVuYW1lLAogICAgICAgICAgICBqb2IsCiAgICAgICAgICAgIG1nciwKICAgICAgICAgICAgaGlyZWRhdGUsCiAgICAgICAgICAgIHNhbCwKICAgICAgICAgICAgY29tbSwKICAgICAgICAgICAgZGVwdG5vCiAgICAgICAgKSB2YWx1ZXMgKCA3NzgyLAogICAgICAgICAgICAgICAgICAgJ0NMQVJLJywKICAgICAgICAgICAgICAgICAgICdNQU5BR0VSJywKICAgICAgICAgICAgICAgICAgIDc4MzksCiAgICAgICAgICAgICAgICAgICB0b19kYXRlKCcwOS0wNi04MScsICdERC1NTS1SUicpLAogICAgICAgICAgICAgICAgICAgMjQ1MCwKICAgICAgICAgICAgICAgICAgIG51bGwsCiAgICAgICAgICAgICAgICAgICAxMCApOwoKICAgICAgICBpbnNlcnQgaW50byBlYmFfZGVtb19sb2FkX2VtcCAoCiAgICAgICAgICAgIGVtcG5vLAogICAgICAgICAgICBlbmFtZSwKICAgICAgICAgICAgam9iLAogICAgICAgICAgICBtZ3IsCiAgICAgICAgICAgIGhpcmVkYXRlLAogICAgICAgICAgICBzYWwsCiAgICAgICAgICAgIGNvbW0sCiAgICAgICAgICAgIGRlcHRubwogICAgICAgICkgdmFsdWVzICggNzU2NiwKICAgICAgICAgICAgICAgICAgICdKT05FUycsCiAgICAgICAgICAgICAgICAgICAnTUFOQUdFUicsCiAgICAgICAgICAgICAgICAgICA3ODM5LAogICAgICAgICAgICAgICAgICAgdG9fZGF0ZSgnMDItMDQtODEnLCAnREQtTU0tUlInKSwKICAgICAgICAgICAgICAgICAgIDI5NzUsCiAgICAgICAgICAgICAgICAgICBudWxsLAogICAgICAgICAgICAgICAgICAgMjAgKTsKCiAgICAgICAgaW5zZXJ0IGludG8gZWJhX2RlbW9fbG9hZF9lbXAgKAogICAgICAgICAgICBlbXBubywKICAgICAgICAgICAgZW5hbWUsCiAgICAgICAgICAgIGpvYiwKICAgICAgICAgICAgbWdyLAogICAgICAgICAgICBoaXJlZGF0ZSwKICAgICAgICAgICAgc2FsLAogICAgICAgICAgICBjb21tLAogICAgICAgICAgICBkZXB0bm8KICAgICAgICApIHZhbHVlcyAoIDc3ODgsCiAgICAgICAgICAgICAgICAgICAnU0NPVFQnLAogICAgICAgICAgICAgICAgICAgJ0FOQUxZU1QnLAogICAgICAgICAgICAgICAgICAgNzU2NiwKICAgICAgICAgICAgICAgICAgIHRvX2RhdGUoJzA5LTEyLTgyJywgJ0RELU1NLVJSJyksCiAgICAgICAgICAgICAgICAgICAzMDAwLAogICAgICAgICAgICAgICAgICAgbnVsbCwKICAgICAgICAgICAgICAgICAgIDIwICk7CgogICAgICAgIGluc2VydCBpbnRvIGViYV9kZW1vX2xvYWRfZW1wICgKICAgICAgICAgICAgZW1wbm8sCiAgICAgICAgICAgIGVuYW1lLAogICAgICAgICAgICBqb2IsCiAgICAgICAgICAgIG1nciwKICAgICAgICAgICAgaGlyZWRhdGUsCiAgICAgICAgICAgIHNhbCwKICAgICAgICAgICAgY29tbSwKICAgICAgICAgICAgZGVwdG5vCiAgICAgICAgKSB2YWx1ZXMgKCA3OTAyLAogICAgICAgICAgICAgICAgICAgJ0ZPUkQnLAogICAgICAgICAgICAgICAgICAgJ0FOQUxZU1QnLAogICAgICAgICAgICAgICAgICAgNzU2NiwKICAgICAgICAgICAgICAgICAgIHRvX2RhdGUoJzAzLTEyLTgxJywgJ0RELU1NLVJSJyksCiAgICAgICAgICAgICAgICAgICAzMDAwLAogICAgICAgICAgICAgICAgICAgbnVsbCwKICAgICAgICAgICAgICAgICAgIDIwICk7CgogICAgICAgIGluc2VydCBpbnRvIGViYV9kZW1vX2xvYWRfZW1wICgKICAgICAgICAgICAgZW1wbm8sCiAgICAgICAgICAgIGVuYW1lLAogICAgICAgICAgICBqb2IsCiAgICAgICAgICAgIG1nciwKICAgICAgICAgICAgaGlyZWRhdGUsCiAgICAgICAgICAgIHNhbCwKICAgICAgICAgICAgY29tbSwKICAgICAgICAgICAgZGVwdG5vCiAgICAgICAgKSB2YWx1ZXMgKCA3MzY5LAogICAgICAgICAgICAgICAgICAgJ1NNSVRIJywKICAgICAgICAgICAgICAgICAgICdDTEVSSycsCiAgICAgICAgICAgICAgICAgICA3OTAyLAogICAgICAgICAgICAgICAgICAgdG9fZGF0ZSgnMTctMTItODAnLCAnREQtTU0tUlInKSwKICAgICAgICAgICAgICAgICAgIDgwMCwKICAgICAgICAgICAgICAgICAgIG51bGwsCiAgICAgICAgICAgICAgICAgICAyMCApOwoKICAgICAgICBpbnNlcnQgaW50byBlYmFfZGVtb19sb2FkX2VtcCAoCiAgICAgICAgICAgIGVtcG5vLAogICAgICAgICAgICBlbmFtZSwKICAgICAgICAgICAgam9iLAogICAgICAgICAgICBtZ3IsCiAgICAgICAgICAgIGhpcmVkYXRlLAogICAgICAgICAgICBzYWwsCiAgICAgICAgICAgIGNvbW0sCiAgICAgICAgICAgIGRlcHRubwogICAgICAgICkgdmFsdWVzICggNzQ5OSwKICAgICAgICAgICAgICAgICAgICdBTExFTicsCiAgICAgICAgICAgICAgICAgICAnU0FMRVNNQU4nLAogICAgICAgICAgICAgICAgICAgNzY5OCwKICAgICAgICAgICAgICAgICAgIHRvX2RhdGUoJzIwLTAyLTgxJywgJ0RELU1NLVJSJyksCiAgICAgICAgICAgICAgICAgICAxNjAwLAogICAgICAgICAgICAgICAgICAgMzAwLAogICAgICAgICAgICAgICAgICAgMzAgKTsKCiAgICAgICAgaW5zZXJ0IGludG8gZWJhX2RlbW9fbG9hZF9lbXAgKAogICAgICAgICAgICBlbXBubywKICAgICAgICAgICAgZW5hbWUsCiAgICAgICAgICAgIGpvYiwKICAgICAgICAgICAgbWdyLAogICAgICAgICAgICBoaXJlZGF0ZSwKICAgICAgICAgICAgc2FsLAogICAgICAgICAgICBjb21tLAogICAgICAgICAgICBkZXB0bm8KICAgICAgICApIHZhbHVlcyAoIDc1MjEsCiAgICAgICAgICAgICAgICAgICAnV0FSRCcsCiAgICAgICAgICAgICAgICAgICAnU0FMRVNNQU4nLAogICAgICAgICAgICAgICAgICAgNzY5OCwKICAgICAgICAgICAgICAgICAgIHRvX2RhdGUoJzIyLTAyLTgxJywgJ0RELU1NLVJSJyksCiAgICAgICAgICAgICAgICAgICAxMjUwLAogICAgICAgICAgICAgICAgICAgNTAwLAogICAgICAgICAgICAgICAgICAgMzAgKTsKCiAgICAgICAgaW5zZXJ0IGludG8gZWJhX2RlbW9fbG9hZF9lbXAgKAogICAgICAgICAgICBlbXBubywKICAgICAgICAgICAgZW5hbWUsCiAgICAgICAgICAgIGpvYiwKICAgICAgICAgICAgbWdyLAogICAgICAgICAgICBoaXJlZGF0ZSwKICAgICAgICAgICAgc2FsLAogICAgICAgICAgICBjb21tLAogICAgICAgICAgICBkZXB0bm8KICAgICAgICApIHZhbHVlcyAoIDc2NTQsCiAgICAgICAgICAgICAgICAgICAnTUFSVElOJywKICAgICAgICAgICAgICAgICAgICdTQUxFU01BTicsCiAgICAgICAgICAgICAgICAgICA3Njk4LAogICAgICAgICAgICAgICAgICAgdG9fZGF0ZSgnMjgtMDktODEnLCAnREQtTU0tUlInKSwKICAgICAgICAgICAgICAgICAgIDEyNTAsCiAgICAgICAgICAgICAgICAgICAxNDAwLAogICAgICAgICAgICAgICAgICAgMzAgKTsKCiAgICAgICAgaW5zZXJ0IGludG8gZWJhX2RlbW9fbG9hZF9lbXAgKAogICAgICAgICAgICBlbXBubywKICAgICAgICAgICAgZW5hbWUsCiAgICAgICAgICAgIGpvYiwKICAgICAgICAgICAgbWdyLAogICAgICAgICAgICBoaXJlZGF0ZSwKICAgICAgICAgICAgc2FsLAogICAgICAgICAgICBjb21tLAogICAgICAgICAgICBkZXB0bm8KICAgICAgICApIHZhbHVlcyAoIDc4NDQsCiAgICAgICAgICAgICAgICAgICAnVFVSTkVSJywKICAgICAgICAgICAgICAgICAgICdTQUxFU01BTicsCiAgICAgICAgICAgICAgICAgICA3Njk4LAogICAgICAgICAgICAgICAgICAgdG9fZGF0ZSgnMDgtMDktODEnLCAnREQtTU0tUlInKSwKICAgICAgICAgICAgICAgICAgIDE1MDAsCiAgICAgICAgICAgICAgICAgICAwLAogICAgICAgICAgICAgICAgICAgMzAgKTsKCiAgICAgICAgaW5zZXJ0IGludG8gZWJhX2RlbW9fbG9hZF9lbXAgKAogICAgICAgICAgICBlbXBubywKICAgICAgICAgICAgZW5hbWUsCiAgICAgICAgICAgIGpvYiwKICAgICAgICAgICAgbWdyLAogICAgICAgICAgICBoaXJlZGF0ZSwKICAgICAgICAgICAgc2FsLAogICAgICAgICAgICBjb21tLAogICAgICAgICAgICBkZXB0bm8KICAgICAgICApIHZhbHVlcyAoIDc4NzYsCiAgICAgICAgICAgICAgICAgICAnQURBTVMnLAogICAgICAgICAgICAgICAgICAgJ0NMRVJLJywKICAgICAgICAgICAgICAgICAgIDc3ODgsCiAgICAgICAgICAgICAgICAgICB0b19kYXRlKCcxMi0wMS04MycsICdERC1NTS1SUicpLAogICAgICAgICAgICAgICAgICAgMTEwMCwKICAgICAgICAgICAgICAgICAgIG51bGwsCiAgICAgICAgICAgICAgICAgICAyMCApOwoKICAgICAgICBpbnNlcnQgaW50byBlYmFfZGVtb19sb2FkX2VtcCAoCiAgICAgICAgICAgIGVtcG5vLAogICAgICAgICAgICBlbmFtZSwKICAgICAgICAgICAgam9iLAogICAgICAgICAgICBtZ3IsCiAgICAgICAgICAgIGhpcmVkYXRlLAogICAgICAgICAgICBzYWwsCiAgICAgICAgICAgIGNvbW0sCiAgICAgICAgICAgIGRlcHRubwogICAgICAgICkgdmFsdWVzICggNzkwMCwKICAgICAgICAgICAgICAgICAgICdKQU1FUycsCiAgICAgICAgICAgICAgICAgICAnQ0xFUksnLAogICAgICAgICAgICAgICAgICAgNzY5OCwKICAgICAgICAgICAgICAgICAgIHRvX2RhdGUoJzAzLTEyLTgxJywgJ0RELU1NLVJSJyksCiAgICAgICAgICAgICAgICAgICA5NTAsCiAgICAgICAgICAgICAgICAgICBudWxsLAogICAgICAgICAgICAgICAgICAgMzAgKTsKCiAgICAgICAgaW5zZXJ0IGludG8gZWJhX2RlbW9fbG9hZF9lbXAgKAogICAgICAgICAgICBlbXBubywKICAgICAgICAgICAgZW5hbWUsCiAgICAgICAgICAgIGpvYiwKICAgICAgICAgICAgbWdyLAogICAgICAgICAgICBoaXJlZGF0ZSwKICAgICAgICAgICAgc2FsLAogICAgICAgICAgICBjb21tLAogICAgICAgICAgICBkZXB0bm8KICAgICAgICApIHZhbHVlcyAoIDc5MzQsCiAgICAgICAgICAgICAgICAgICAnTUlMTEVSJywKICAgICAgICAgICAgICAgICAgICdDTEVSSycsCiAgICAgICAgICAgICAgICAgICA3NzgyLAogICAgICAgICAgICAgICAgICAgdG9fZGF0ZSgnMjMtMDEtODInLCAnREQtTU0tUlInKSwKICAgICAgICAgICAgICAgICAgIDEzMDAsCiAgICAgICAgICAgICAgICAgICBudWxsLAogICAgICAgICAgICAgICAgICAgMTAgKTsKCiAgICAgICAgZGVsZXRlIGViYV9kZW1vX2xvYWRfc2FsZXM7CgogICAgZW5kIHJlc2V0X3NhbXBsZTsKCiAgICAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQogICAgLS0gZXh0cmFjdHMgdGhlIENTViBmaWxlIGZyb20gYW4gdXBsb2FkZWQgWklQIGFyY2hpdmUuIE9ubHkgdGhlIGZpcnN0IENTViBmaWxlCiAgICAtLSBpcyByZXR1cm5lZC4KICAgIC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tCiAgICBmdW5jdGlvbiB6aXBfdG9fY3N2ICgKICAgICAgICBwX2Jsb2JfY29udGVudCBpbiBibG9iLAogICAgICAgIHBfbWltZV90eXBlICAgIGluIHZhcmNoYXIyCiAgICApIHJldHVybiBibG9iIGlzCiAgICAgICAgbF96aXBwZWRfZmlsZSAgIGJsb2I7CiAgICAgICAgbF91bnppcHBlZF9maWxlIGJsb2I7CiAgICAgICAgbF96aXBfZmlsZXMgICAgIGFwZXhfemlwLnRfZmlsZXM7CiAgICAgICAgbF9maWxlICAgICAgICAgIGJsb2I7CiAgICBiZWdpbgogICAgICAgIGFwZXhfZGVidWcuZW50ZXIoJ3ppcF90b19jc3YnLCAncF9taW1lX3R5cGUnLCBwX21pbWVfdHlwZSk7CiAgICAgICAgaWYgcF9taW1lX3R5cGUgPSBjX21pbWVfYXBwbGljYXRpb25femlwIHRoZW4KICAgICAgICAgICAgbF96aXBwZWRfZmlsZSA6PSBwX2Jsb2JfY29udGVudDsKICAgICAgICAgICAgbF96aXBfZmlsZXMgOj0gYXBleF96aXAuZ2V0X2ZpbGVzKGxfemlwcGVkX2ZpbGUpOwogICAgICAgICAgICBmb3IgaSBpbiAxLi5sX3ppcF9maWxlcy5jb3VudCBsb29wCiAgICAgICAgICAgICAgICBhcGV4X2RlYnVnLmluZm8oJ1ppcCBFbnRyeSAlcyA9ICVzJywKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGxfemlwX2ZpbGVzKGkpKTsKICAgICAgICAgICAgICAgIGlmIGxvd2VyKGxfemlwX2ZpbGVzKGkpKSBsaWtlICclLmNzdicgdGhlbgogICAgICAgICAgICAgICAgICAgIC0tIGFjY2VwdCBvbmUgdW56aXBwZWQgQ1NWIGZpbGUKICAgICAgICAgICAgICAgICAgICBsX3VuemlwcGVkX2ZpbGUgOj0gYXBleF96aXAuZ2V0X2ZpbGVfY29udGVudChsX3ppcHBlZF9maWxlLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGxfemlwX2ZpbGVzKGkpKTsKICAgICAgICAgICAgICAgICAgICBleGl0OwogICAgICAgICAgICAgICAgZW5kIGlmOwoKICAgICAgICAgICAgZW5kIGxvb3A7CgogICAgICAgICAgICBsX2ZpbGUgOj0gbF91bnppcHBlZF9maWxlOwogICAgICAgIGVsc2UKICAgICAgICAgICAgbF9maWxlIDo9IHBfYmxvYl9jb250ZW50OwogICAgICAgIGVuZCBpZjsKCiAgICAgICAgcmV0dXJuIGxfZmlsZTsKICAgIGVuZCB6aXBfdG9fY3N2OwoKICAgIC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tCiAgICAtLSBzdG9yZSBhIEJMT0IgaW4gdGhlIHBhY2thZ2UgZ2xvYmFsIGZvciBsYXRlciB1c2UuCiAgICAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQogICAgcHJvY2VkdXJlIHNldF9maWxlX2Jsb2IgKAogICAgICAgIHBfYmxvYiBpbiBibG9iCiAgICApIGlzCiAgICBiZWdpbgogICAgICAgIGdfY3VycmVudF9ibG9iIDo9IHBfYmxvYjsKICAgIGVuZCBzZXRfZmlsZV9ibG9iOwoKICAgIC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tCiAgICAtLSBnZXQgdGhlIEJMT0IgZnJvbSB0aGUgcGFja2FnZSBnbG9iYWwuCiAgICAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQogICAgZnVuY3Rpb24gZ2V0X2ZpbGVfYmxvYiByZXR1cm4gYmxvYiBpcwogICAgYmVnaW4KICAgICAgICByZXR1cm4gZ19jdXJyZW50X2Jsb2I7CiAgICBlbmQgZ2V0X2ZpbGVfYmxvYjsKCmVuZCBlYmFfZGVtb19kYXRhX2xvYWQ7Ci8=}')));
+ execute immediate insertlog using id,author,filename,action,sxml,dep,status returning into myrow;
+end;
+[2025-12-11 17:00:28] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing with the 'SqlCl-jdbc' executor
+[2025-12-11 17:00:28] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing sql 
+-- sqlcl_snapshot src/database/wksp_demo/package_bodies/eba_demo_data_load.sql:null:f22c285df8d7fb53d6626bf82565d3befb1955c6:create
+
+create or replace package body eba_demo_data_load as
+
+    --------------------------------------------------------------------------------
+    -- global variable to hold the CSV contents being extracted from the uploaded
+    -- ZIP archive; see page 17.
+    --------------------------------------------------------------------------------
+    g_current_blob         blob;
+
+    --------------------------------------------------------------------------------
+    -- constants
+    --------------------------------------------------------------------------------
+    c_mime_application_zip constant varchar2(30) := 'application/zip';
+
+    --------------------------------------------------------------------------------
+    -- resets all sample tables
+    --------------------------------------------------------------------------------
+    procedure reset_sample is
+    begin
+        delete eba_demo_load_emp;
+
+        delete eba_demo_load_dept;
+
+        delete eba_demo_load_emp_err$;
+
+        insert into eba_demo_load_dept (
+            deptno,
+            dname,
+            loc
+        ) values ( 10,
+                   'ACCOUNTING',
+                   'NEW YORK' );
+
+        insert into eba_demo_load_dept (
+            deptno,
+            dname,
+            loc
+        ) values ( 20,
+                   'RESEARCH',
+                   'DALLAS' );
+
+        insert into eba_demo_load_dept (
+            deptno,
+            dname,
+            loc
+        ) values ( 30,
+                   'SALES',
+                   'CHICAGO' );
+
+        insert into eba_demo_load_dept (
+            deptno,
+            dname,
+            loc
+        ) values ( 40,
+                   'OPERATIONS',
+                   'BOSTON' );
+
+        insert into eba_demo_load_emp (
+            empno,
+            ename,
+            job,
+            mgr,
+            hiredate,
+            sal,
+            comm,
+            deptno
+        ) values ( 7839,
+                   'KING',
+                   'PRESIDENT',
+                   null,
+                   to_date('17-11-81', 'DD-MM-RR'),
+                   5000,
+                   null,
+                   10 );
+
+        insert into eba_demo_load_emp (
+            empno,
+            ename,
+            job,
+            mgr,
+            hiredate,
+            sal,
+            comm,
+            deptno
+        ) values ( 7698,
+                   'BLAKE',
+                   'MANAGER',
+                   7839,
+                   to_date('01-05-81', 'DD-MM-RR'),
+                   2850,
+                   null,
+                   30 );
+
+        insert into eba_demo_load_emp (
+            empno,
+            ename,
+            job,
+            mgr,
+            hiredate,
+            sal,
+            comm,
+            deptno
+        ) values ( 7782,
+                   'CLARK',
+                   'MANAGER',
+                   7839,
+                   to_date('09-06-81', 'DD-MM-RR'),
+                   2450,
+                   null,
+                   10 );
+
+        insert into eba_demo_load_emp (
+            empno,
+            ename,
+            job,
+            mgr,
+            hiredate,
+            sal,
+            comm,
+            deptno
+        ) values ( 7566,
+                   'JONES',
+                   'MANAGER',
+                   7839,
+                   to_date('02-04-81', 'DD-MM-RR'),
+                   2975,
+                   null,
+                   20 );
+
+        insert into eba_demo_load_emp (
+            empno,
+            ename,
+            job,
+            mgr,
+            hiredate,
+            sal,
+            comm,
+            deptno
+        ) values ( 7788,
+                   'SCOTT',
+                   'ANALYST',
+                   7566,
+                   to_date('09-12-82', 'DD-MM-RR'),
+                   3000,
+                   null,
+                   20 );
+
+        insert into eba_demo_load_emp (
+            empno,
+            ename,
+            job,
+            mgr,
+            hiredate,
+            sal,
+            comm,
+            deptno
+        ) values ( 7902,
+                   'FORD',
+                   'ANALYST',
+                   7566,
+                   to_date('03-12-81', 'DD-MM-RR'),
+                   3000,
+                   null,
+                   20 );
+
+        insert into eba_demo_load_emp (
+            empno,
+            ename,
+            job,
+            mgr,
+            hiredate,
+            sal,
+            comm,
+            deptno
+        ) values ( 7369,
+                   'SMITH',
+                   'CLERK',
+                   7902,
+                   to_date('17-12-80', 'DD-MM-RR'),
+                   800,
+                   null,
+                   20 );
+
+        insert into eba_demo_load_emp (
+            empno,
+            ename,
+            job,
+            mgr,
+            hiredate,
+            sal,
+            comm,
+            deptno
+        ) values ( 7499,
+                   'ALLEN',
+                   'SALESMAN',
+                   7698,
+                   to_date('20-02-81', 'DD-MM-RR'),
+                   1600,
+                   300,
+                   30 );
+
+        insert into eba_demo_load_emp (
+            empno,
+            ename,
+            job,
+            mgr,
+            hiredate,
+            sal,
+            comm,
+            deptno
+        ) values ( 7521,
+                   'WARD',
+                   'SALESMAN',
+                   7698,
+                   to_date('22-02-81', 'DD-MM-RR'),
+                   1250,
+                   500,
+                   30 );
+
+        insert into eba_demo_load_emp (
+            empno,
+            ename,
+            job,
+            mgr,
+            hiredate,
+            sal,
+            comm,
+            deptno
+        ) values ( 7654,
+                   'MARTIN',
+                   'SALESMAN',
+                   7698,
+                   to_date('28-09-81', 'DD-MM-RR'),
+                   1250,
+                   1400,
+                   30 );
+
+        insert into eba_demo_load_emp (
+            empno,
+            ename,
+            job,
+            mgr,
+            hiredate,
+            sal,
+            comm,
+            deptno
+        ) values ( 7844,
+                   'TURNER',
+                   'SALESMAN',
+                   7698,
+                   to_date('08-09-81', 'DD-MM-RR'),
+                   1500,
+                   0,
+                   30 );
+
+        insert into eba_demo_load_emp (
+            empno,
+            ename,
+            job,
+            mgr,
+            hiredate,
+            sal,
+            comm,
+            deptno
+        ) values ( 7876,
+                   'ADAMS',
+                   'CLERK',
+                   7788,
+                   to_date('12-01-83', 'DD-MM-RR'),
+                   1100,
+                   null,
+                   20 );
+
+        insert into eba_demo_load_emp (
+            empno,
+            ename,
+            job,
+            mgr,
+            hiredate,
+            sal,
+            comm,
+            deptno
+        ) values ( 7900,
+                   'JAMES',
+                   'CLERK',
+                   7698,
+                   to_date('03-12-81', 'DD-MM-RR'),
+                   950,
+                   null,
+                   30 );
+
+        insert into eba_demo_load_emp (
+            empno,
+            ename,
+            job,
+            mgr,
+            hiredate,
+            sal,
+            comm,
+            deptno
+        ) values ( 7934,
+                   'MILLER',
+                   'CLERK',
+                   7782,
+                   to_date('23-01-82', 'DD-MM-RR'),
+                   1300,
+                   null,
+                   10 );
+
+        delete eba_demo_load_sales;
+
+    end reset_sample;
+
+    --------------------------------------------------------------------------------
+    -- extracts the CSV file from an uploaded ZIP archive. Only the first CSV file
+    -- is returned.
+    --------------------------------------------------------------------------------
+    function zip_to_csv (
+        p_blob_content in blob,
+        p_mime_type    in varchar2
+    ) return blob is
+        l_zipped_file   blob;
+        l_unzipped_file blob;
+        l_zip_files     apex_zip.t_files;
+        l_file          blob;
+    begin
+        apex_debug.enter('zip_to_csv', 'p_mime_type', p_mime_type);
+        if p_mime_type = c_mime_application_zip then
+            l_zipped_file := p_blob_content;
+            l_zip_files := apex_zip.get_files(l_zipped_file);
+            for i in 1..l_zip_files.count loop
+                apex_debug.info('Zip Entry %s = %s',
+                                i,
+                                l_zip_files(i));
+                if lower(l_zip_files(i)) like '%.csv' then
+                    -- accept one unzipped CSV file
+                    l_unzipped_file := apex_zip.get_file_content(l_zipped_file,
+                                                                 l_zip_files(i));
+                    exit;
+                end if;
+
+            end loop;
+
+            l_file := l_unzipped_file;
+        else
+            l_file := p_blob_content;
+        end if;
+
+        return l_file;
+    end zip_to_csv;
+
+    --------------------------------------------------------------------------------
+    -- store a BLOB in the package global for later use.
+    --------------------------------------------------------------------------------
+    procedure set_file_blob (
+        p_blob in blob
+    ) is
+    begin
+        g_current_blob := p_blob;
+    end set_file_blob;
+
+    --------------------------------------------------------------------------------
+    -- get the BLOB from the package global.
+    --------------------------------------------------------------------------------
+    function get_file_blob return blob is
+    begin
+        return g_current_blob;
+    end get_file_blob;
+
+end eba_demo_data_load;
+[2025-12-11 17:00:28] INFO [liquibase.changelog] Custom SQL executed
+[2025-12-11 17:00:28] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing with the 'SqlCl-jdbc' executor
+[2025-12-11 17:00:28] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing sql 
+update WKSP_DEMO.DATABASECHANGELOG_ACTIONS set status = 'RAN' where id = '1765472152047' and status != 'FAILED'  and sequence = (select max(sequence) from WKSP_DEMO.DATABASECHANGELOG_ACTIONS where id = '1765472152047')
+[2025-12-11 17:00:28] INFO [liquibase.changelog] ChangeSet release_base_1.0/wksp_demo/package_bodies/eba_demo_data_load.sql::1765472152047::WKSP_DEMO ran successfully in 395ms
+[2025-12-11 17:00:28] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing with the 'SqlCl-jdbc' executor
+[2025-12-11 17:00:28] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing sql 
+-- Logging Oracle Liquibase Extension actions to WKSP_DEMO.DATABASECHANGELOG_ACTIONS
+ DECLARE 
+ id varchar2(2000) := '1765472151661';
+ status varchar2(2000) := 'PREPARING';
+ rawAction clob;
+ rawSxml clob;
+ myrow varchar2(2000);
+ action clob := '';
+ sxml clob := '';
+ dep varchar2(2000) := '5472425840';
+ author varchar2(2000) := 'wksp_demo';
+ filename varchar2(2000) := 'release_base_1.0/wksp_demo/comments/eba_demo_load_emp_err$.sql';
+ insertlog varchar2(2000) := 'insert into WKSP_DEMO.DATABASECHANGELOG_ACTIONS (id,author,filename,sql,sxml,deployment_id,status) values (:id,:author,:filename,:action,:sxml,:dep,:status) returning rowid into :out';
+ updateaction varchar2(2000) := 'update WKSP_DEMO.DATABASECHANGELOG_ACTIONS set sql = sql ||:action where rowid = :myrow ';
+ updatesxml varchar2(2000) := 'update WKSP_DEMO.DATABASECHANGELOG_ACTIONS set sxml = sxml ||:sxml where rowid = :myrow ';
+ begin 
+action := utl_raw.cast_to_varchar2(utl_encode.base64_decode(utl_raw.cast_to_raw(q'{LS0gc3FsY2xfc25hcHNob3Qgc3JjL2RhdGFiYXNlL3drc3BfZGVtby9jb21tZW50cy9lYmFfZGVtb19sb2FkX2VtcF9lcnIkLnNxbDpudWxsOmU1YTczMGZiMTU0YmY4Mzc4MDkzYjg5NThjM2VjNGI0ZjMwMDM0MDg6Y3JlYXRlCgpjb21tZW50IG9uIHRhYmxlIGViYV9kZW1vX2xvYWRfZW1wX2VyciQgaXMKICAgICdETUwgRXJyb3IgTG9nZ2luZyB0YWJsZSBmb3IgIkVCQV9ERU1PX0xPQURfRU1QIic7}')));
+ execute immediate insertlog using id,author,filename,action,sxml,dep,status returning into myrow;
+end;
+[2025-12-11 17:00:28] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing with the 'SqlCl-jdbc' executor
+[2025-12-11 17:00:28] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing sql 
+-- sqlcl_snapshot src/database/wksp_demo/comments/eba_demo_load_emp_err$.sql:null:e5a730fb154bf8378093b8958c3ec4b4f3003408:create
+
+comment on table eba_demo_load_emp_err$ is
+    'DML Error Logging table for "EBA_DEMO_LOAD_EMP"';
+[2025-12-11 17:00:28] INFO [liquibase.changelog] Custom SQL executed
+[2025-12-11 17:00:28] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing with the 'SqlCl-jdbc' executor
+[2025-12-11 17:00:28] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing sql 
+update WKSP_DEMO.DATABASECHANGELOG_ACTIONS set status = 'RAN' where id = '1765472151661' and status != 'FAILED'  and sequence = (select max(sequence) from WKSP_DEMO.DATABASECHANGELOG_ACTIONS where id = '1765472151661')
+[2025-12-11 17:00:28] INFO [liquibase.changelog] ChangeSet release_base_1.0/wksp_demo/comments/eba_demo_load_emp_err$.sql::1765472151661::wksp_demo ran successfully in 120ms
+[2025-12-11 17:00:28] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing with the 'SqlCl-jdbc' executor
+[2025-12-11 17:00:28] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing sql 
+-- Logging Oracle Liquibase Extension actions to WKSP_DEMO.DATABASECHANGELOG_ACTIONS
+ DECLARE 
+ id varchar2(2000) := '1765472151696';
+ status varchar2(2000) := 'PREPARING';
+ rawAction clob;
+ rawSxml clob;
+ myrow varchar2(2000);
+ action clob := '';
+ sxml clob := '';
+ dep varchar2(2000) := '5472425840';
+ author varchar2(2000) := 'WKSP_DEMO';
+ filename varchar2(2000) := 'release_base_1.0/wksp_demo/indexes/eba_demo_load_emp_1.sql';
+ insertlog varchar2(2000) := 'insert into WKSP_DEMO.DATABASECHANGELOG_ACTIONS (id,author,filename,sql,sxml,deployment_id,status) values (:id,:author,:filename,:action,:sxml,:dep,:status) returning rowid into :out';
+ updateaction varchar2(2000) := 'update WKSP_DEMO.DATABASECHANGELOG_ACTIONS set sql = sql ||:action where rowid = :myrow ';
+ updatesxml varchar2(2000) := 'update WKSP_DEMO.DATABASECHANGELOG_ACTIONS set sxml = sxml ||:sxml where rowid = :myrow ';
+ begin 
+action := utl_raw.cast_to_varchar2(utl_encode.base64_decode(utl_raw.cast_to_raw(q'{LS0gc3FsY2xfc25hcHNob3Qgc3JjL2RhdGFiYXNlL3drc3BfZGVtby9pbmRleGVzL2ViYV9kZW1vX2xvYWRfZW1wXzEuc3FsOm51bGw6N2ZhYjM4MGNiYWI4ZDAyNGQ0NTJjYmFhNmQ4NjUyNDA0MTYyYWM3ZTpjcmVhdGUKCmNyZWF0ZSBpbmRleCBlYmFfZGVtb19sb2FkX2VtcF8xIG9uCiAgICBlYmFfZGVtb19sb2FkX2VtcCAoCiAgICAgICAgbWdyCiAgICApOw==}')));
+ execute immediate insertlog using id,author,filename,action,sxml,dep,status returning into myrow;
+end;
+[2025-12-11 17:00:28] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing with the 'SqlCl-jdbc' executor
+[2025-12-11 17:00:28] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing sql 
+-- sqlcl_snapshot src/database/wksp_demo/indexes/eba_demo_load_emp_1.sql:null:7fab380cbab8d024d452cbaa6d8652404162ac7e:create
+
+create index eba_demo_load_emp_1 on
+    eba_demo_load_emp (
+        mgr
+    );
+[2025-12-11 17:00:28] INFO [liquibase.changelog] Custom SQL executed
+[2025-12-11 17:00:28] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing with the 'SqlCl-jdbc' executor
+[2025-12-11 17:00:28] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing sql 
+update WKSP_DEMO.DATABASECHANGELOG_ACTIONS set status = 'RAN' where id = '1765472151696' and status != 'FAILED'  and sequence = (select max(sequence) from WKSP_DEMO.DATABASECHANGELOG_ACTIONS where id = '1765472151696')
+[2025-12-11 17:00:28] INFO [liquibase.changelog] ChangeSet release_base_1.0/wksp_demo/indexes/eba_demo_load_emp_1.sql::1765472151696::WKSP_DEMO ran successfully in 144ms
+[2025-12-11 17:00:28] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing with the 'SqlCl-jdbc' executor
+[2025-12-11 17:00:28] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing sql 
+-- Logging Oracle Liquibase Extension actions to WKSP_DEMO.DATABASECHANGELOG_ACTIONS
+ DECLARE 
+ id varchar2(2000) := '1765472151776';
+ status varchar2(2000) := 'PREPARING';
+ rawAction clob;
+ rawSxml clob;
+ myrow varchar2(2000);
+ action clob := '';
+ sxml clob := '';
+ dep varchar2(2000) := '5472425840';
+ author varchar2(2000) := 'WKSP_DEMO';
+ filename varchar2(2000) := 'release_base_1.0/wksp_demo/indexes/eba_demo_load_emp_2.sql';
+ insertlog varchar2(2000) := 'insert into WKSP_DEMO.DATABASECHANGELOG_ACTIONS (id,author,filename,sql,sxml,deployment_id,status) values (:id,:author,:filename,:action,:sxml,:dep,:status) returning rowid into :out';
+ updateaction varchar2(2000) := 'update WKSP_DEMO.DATABASECHANGELOG_ACTIONS set sql = sql ||:action where rowid = :myrow ';
+ updatesxml varchar2(2000) := 'update WKSP_DEMO.DATABASECHANGELOG_ACTIONS set sxml = sxml ||:sxml where rowid = :myrow ';
+ begin 
+action := utl_raw.cast_to_varchar2(utl_encode.base64_decode(utl_raw.cast_to_raw(q'{LS0gc3FsY2xfc25hcHNob3Qgc3JjL2RhdGFiYXNlL3drc3BfZGVtby9pbmRleGVzL2ViYV9kZW1vX2xvYWRfZW1wXzIuc3FsOm51bGw6Y2I5YzY5ZjcxNDZlZDYwNzMwYWMxZjdmYjliYmZmYzU1Mzg2NjI4MzpjcmVhdGUKCmNyZWF0ZSBpbmRleCBlYmFfZGVtb19sb2FkX2VtcF8yIG9uCiAgICBlYmFfZGVtb19sb2FkX2VtcCAoCiAgICAgICAgZGVwdG5vCiAgICApOw==}')));
+ execute immediate insertlog using id,author,filename,action,sxml,dep,status returning into myrow;
+end;
+[2025-12-11 17:00:28] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing with the 'SqlCl-jdbc' executor
+[2025-12-11 17:00:28] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing sql 
+-- sqlcl_snapshot src/database/wksp_demo/indexes/eba_demo_load_emp_2.sql:null:cb9c69f7146ed60730ac1f7fb9bbffc553866283:create
+
+create index eba_demo_load_emp_2 on
+    eba_demo_load_emp (
+        deptno
+    );
+[2025-12-11 17:00:28] INFO [liquibase.changelog] Custom SQL executed
+[2025-12-11 17:00:28] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing with the 'SqlCl-jdbc' executor
+[2025-12-11 17:00:28] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing sql 
+update WKSP_DEMO.DATABASECHANGELOG_ACTIONS set status = 'RAN' where id = '1765472151776' and status != 'FAILED'  and sequence = (select max(sequence) from WKSP_DEMO.DATABASECHANGELOG_ACTIONS where id = '1765472151776')
+[2025-12-11 17:00:28] INFO [liquibase.changelog] ChangeSet release_base_1.0/wksp_demo/indexes/eba_demo_load_emp_2.sql::1765472151776::WKSP_DEMO ran successfully in 126ms
+[2025-12-11 17:00:29] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing with the 'SqlCl-jdbc' executor
+[2025-12-11 17:00:29] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing sql 
+-- Logging Oracle Liquibase Extension actions to WKSP_DEMO.DATABASECHANGELOG_ACTIONS
+ DECLARE 
+ id varchar2(2000) := '1765472152130';
+ status varchar2(2000) := 'PREPARING';
+ rawAction clob;
+ rawSxml clob;
+ myrow varchar2(2000);
+ action clob := '';
+ sxml clob := '';
+ dep varchar2(2000) := '5472425840';
+ author varchar2(2000) := 'WKSP_DEMO';
+ filename varchar2(2000) := 'release_base_1.0/wksp_demo/ref_constraints/eba_demo_load_emp.eba_demo_load_dept.sql';
+ insertlog varchar2(2000) := 'insert into WKSP_DEMO.DATABASECHANGELOG_ACTIONS (id,author,filename,sql,sxml,deployment_id,status) values (:id,:author,:filename,:action,:sxml,:dep,:status) returning rowid into :out';
+ updateaction varchar2(2000) := 'update WKSP_DEMO.DATABASECHANGELOG_ACTIONS set sql = sql ||:action where rowid = :myrow ';
+ updatesxml varchar2(2000) := 'update WKSP_DEMO.DATABASECHANGELOG_ACTIONS set sxml = sxml ||:sxml where rowid = :myrow ';
+ begin 
+action := utl_raw.cast_to_varchar2(utl_encode.base64_decode(utl_raw.cast_to_raw(q'{LS0gc3FsY2xfc25hcHNob3Qgc3JjL2RhdGFiYXNlL3drc3BfZGVtby9yZWZfY29uc3RyYWludHMvZWJhX2RlbW9fbG9hZF9lbXAuZWJhX2RlbW9fbG9hZF9kZXB0LnNxbDpudWxsOjMzYzk3MTFjN2MwNThmZGQzNmQyNTQxZWIwZThhOWJjY2FhNmYzNDY6Y3JlYXRlCgphbHRlciB0YWJsZSBlYmFfZGVtb19sb2FkX2VtcAogICAgYWRkCiAgICAgICAgZm9yZWlnbiBrZXkgKCBkZXB0bm8gKQogICAgICAgICAgICByZWZlcmVuY2VzIGViYV9kZW1vX2xvYWRfZGVwdCAoIGRlcHRubyApCiAgICAgICAgZW5hYmxlOw==}')));
+ execute immediate insertlog using id,author,filename,action,sxml,dep,status returning into myrow;
+end;
+[2025-12-11 17:00:29] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing with the 'SqlCl-jdbc' executor
+[2025-12-11 17:00:29] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing sql 
+-- sqlcl_snapshot src/database/wksp_demo/ref_constraints/eba_demo_load_emp.eba_demo_load_dept.sql:null:33c9711c7c058fdd36d2541eb0e8a9bccaa6f346:create
+
+alter table eba_demo_load_emp
+    add
+        foreign key ( deptno )
+            references eba_demo_load_dept ( deptno )
+        enable;
+[2025-12-11 17:00:29] INFO [liquibase.changelog] Custom SQL executed
+[2025-12-11 17:00:29] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing with the 'SqlCl-jdbc' executor
+[2025-12-11 17:00:29] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing sql 
+update WKSP_DEMO.DATABASECHANGELOG_ACTIONS set status = 'RAN' where id = '1765472152130' and status != 'FAILED'  and sequence = (select max(sequence) from WKSP_DEMO.DATABASECHANGELOG_ACTIONS where id = '1765472152130')
+[2025-12-11 17:00:29] INFO [liquibase.changelog] ChangeSet release_base_1.0/wksp_demo/ref_constraints/eba_demo_load_emp.eba_demo_load_dept.sql::1765472152130::WKSP_DEMO ran successfully in 187ms
+[2025-12-11 17:00:29] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing with the 'SqlCl-jdbc' executor
+[2025-12-11 17:00:29] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing sql 
+-- Logging Oracle Liquibase Extension actions to WKSP_DEMO.DATABASECHANGELOG_ACTIONS
+ DECLARE 
+ id varchar2(2000) := 'INSTALL_115';
+ status varchar2(2000) := 'PREPARING';
+ rawAction clob;
+ rawSxml clob;
+ myrow varchar2(2000);
+ action clob := '';
+ sxml clob := '';
+ dep varchar2(2000) := '5472425840';
+ author varchar2(2000) := 'SQLCL-Generated';
+ filename varchar2(2000) := 'releases/apex/f115/f115.xml';
+ insertlog varchar2(2000) := 'insert into WKSP_DEMO.DATABASECHANGELOG_ACTIONS (id,author,filename,sql,sxml,deployment_id,status) values (:id,:author,:filename,:action,:sxml,:dep,:status) returning rowid into :out';
+ updateaction varchar2(2000) := 'update WKSP_DEMO.DATABASECHANGELOG_ACTIONS set sql = sql ||:action where rowid = :myrow ';
+ updatesxml varchar2(2000) := 'update WKSP_DEMO.DATABASECHANGELOG_ACTIONS set sxml = sxml ||:sxml where rowid = :myrow ';
+ begin 
+action := utl_raw.cast_to_varchar2(utl_encode.base64_decode(utl_raw.cast_to_raw(q'{ZGVjbGFyZSAKIC0tIHNxbGNsIHZlcnNpb24gICAgICA9IDI1LjMuMC4wIAogLS0gb3ZlcnJpZGVfc2NoZW1hICAgID0gJHthcGV4LjExNS5zY2hlbWF9CiAtLSBvdmVycmlkZV9hbGlhcyAgICAgPSAke2FwZXguMTE1LmFsaWFzfQogLS0gb3ZlcnJpZGVfd29ya3NwYWNlID0gJHthcGV4LjExNS53b3Jrc3BhY2V9CiAtLSBvdmVycmlkZV9hcHBfaWQgICAgPSAke2FwZXguMTE1LmFwcElkfQoKIGxfYXBwX2lkIHZhcmNoYXIyKDI1NSkgOj0gcSdbMTE1XSc7ICAKIGxfd29ya3NwYWNlIHZhcmNoYXIyKDI1NSkgOj0gcSdbREVNT10nOyAKCiBsX292ZXJyaWRlX3dvcmtzcGFjZSB2YXJjaGFyMigyNTUpIDo9IHEnWyR7YXBleC4xMTUud29ya3NwYWNlfV0nOyAKIGxfb3ZlcnJpZGVfc2NoZW1hIHZhcmNoYXIyKDI1NSkgOj0gcSdbJHthcGV4LjExNS5zY2hlbWF9XSc7IAogbF9vdmVycmlkZV9hbGlhcyB2YXJjaGFyMigyNTUpIDo9IHEnWyR7YXBleC4xMTUuYWxpYXN9XSc7IAogbF9vdmVycmlkZV9hcHBfaWQgdmFyY2hhcjIoMjU1KSA6PSBxJ1ske2FwZXguMTE1LmFwcElkfV0nOyAKIGxfZ2VuZXJhdGVfb2Zmc2V0IGJvb2xlYW4gOj0gZmFsc2U7CgogZnVuY3Rpb24gZ2V0X3Byb3BfZGVmYXVsdChwX3Byb3BfbmFtZSB2YXJjaGFyMikKIHJldHVybiB2YXJjaGFyMiBpcwogYmVnaW4gIAogICByZXR1cm4gJyR7YXBleC4xMTUuJyB8fCBwX3Byb3BfbmFtZSB8fCAnfSc7CiBlbmQ7ICAKCiBiZWdpbiAgCiAgYXBleF9hcHBsaWNhdGlvbl9pbnN0YWxsLmNsZWFyX2FsbCgpOyAKCiAgLS0gc2V0IHdvcmtzcGFjZSAKICAgICBpZiAobF9vdmVycmlkZV93b3Jrc3BhY2UgIT0gbF93b3Jrc3BhY2UgYW5kIGxfb3ZlcnJpZGVfd29ya3NwYWNlICE9IGdldF9wcm9wX2RlZmF1bHQoJ3dvcmtzcGFjZScpKSB0aGVuCiAgICAgIGFwZXhfYXBwbGljYXRpb25faW5zdGFsbC5zZXRfd29ya3NwYWNlKGxfb3ZlcnJpZGVfd29ya3NwYWNlKTsKICBlbHNlIAogICAgICBhcGV4X2FwcGxpY2F0aW9uX2luc3RhbGwuc2V0X3dvcmtzcGFjZShsX3dvcmtzcGFjZSk7ICAgICAgICAgCiAgZW5kIGlmOyAKICBjb21taXQ7ICAKCiAgLS0gc2V0IGFwcCBpZCAKICBpZiAobF9vdmVycmlkZV9hcHBfaWQgIT0gbF9hcHBfaWQgYW5kIGxfb3ZlcnJpZGVfYXBwX2lkICE9IGdldF9wcm9wX2RlZmF1bHQoJ2FwcElkJykpIHRoZW4KICAgICBhcGV4X2FwcGxpY2F0aW9uX2luc3RhbGwuc2V0X2FwcGxpY2F0aW9uX2lkKGxfb3ZlcnJpZGVfYXBwX2lkKTsKICAgIGxfZ2VuZXJhdGVfb2Zmc2V0IDo9IHRydWU7CiAgZWxzZSAgCiAgICAgIGFwZXhfYXBwbGljYXRpb25faW5zdGFsbC5zZXRfYXBwbGljYXRpb25faWQobF9hcHBfaWQpOwogIGVuZCBpZjsgCgogaWYgKGxfb3ZlcnJpZGVfc2NoZW1hICE9IGdldF9wcm9wX2RlZmF1bHQoJ3NjaGVtYScpKSB0aGVuCiAgICBhcGV4X2FwcGxpY2F0aW9uX2luc3RhbGwuc2V0X3NjaGVtYShsX292ZXJyaWRlX3NjaGVtYSk7CiAgZW5kIGlmOwoKICAtLSBzZXQgYWxpYXMgCiAgaWYgKGxfb3ZlcnJpZGVfYWxpYXMgIT0gZ2V0X3Byb3BfZGVmYXVsdCgnYWxpYXMnKSkgdGhlbgogICAgYXBleF9hcHBsaWNhdGlvbl9pbnN0YWxsLnNldF9hcHBsaWNhdGlvbl9hbGlhcyhsX292ZXJyaWRlX2FsaWFzKTsKICAgbF9nZW5lcmF0ZV9vZmZzZXQgOj0gdHJ1ZTsKIGVuZCBpZjsKCiAgLS0gZ2VuZXJhdGUgb2Zmc2V0IGlmIG5lY2Vzc2FyeQogaWYgKGxfZ2VuZXJhdGVfb2Zmc2V0KSAgdGhlbgogICAgYXBleF9hcHBsaWNhdGlvbl9pbnN0YWxsLmdlbmVyYXRlX29mZnNldCgpOwogZW5kIGlmOwplbmQ7ICAKLwotLSBzcWxjbF9jaGVja3N1bSAgMTc2NTQ3MjE1MjczNApAZjExNS5zcWw=}')));
+ execute immediate insertlog using id,author,filename,action,sxml,dep,status returning into myrow;
+end;
+[2025-12-11 17:00:29] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing with the 'SqlCl-jdbc' executor
+[2025-12-11 17:00:29] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing sql 
+declare 
+ -- sqlcl version      = 25.3.0.0 
+ -- override_schema    = ${apex.115.schema}
+ -- override_alias     = ${apex.115.alias}
+ -- override_workspace = ${apex.115.workspace}
+ -- override_app_id    = ${apex.115.appId}
+
+ l_app_id varchar2(255) := q'[115]';  
+ l_workspace varchar2(255) := q'[DEMO]'; 
+
+ l_override_workspace varchar2(255) := q'[${apex.115.workspace}]'; 
+ l_override_schema varchar2(255) := q'[${apex.115.schema}]'; 
+ l_override_alias varchar2(255) := q'[${apex.115.alias}]'; 
+ l_override_app_id varchar2(255) := q'[${apex.115.appId}]'; 
+ l_generate_offset boolean := false;
+
+ function get_prop_default(p_prop_name varchar2)
+ return varchar2 is
+ begin  
+   return '${apex.115.' || p_prop_name || '}';
+ end;  
+
+ begin  
+  apex_application_install.clear_all(); 
+
+  -- set workspace 
+     if (l_override_workspace != l_workspace and l_override_workspace != get_prop_default('workspace')) then
+      apex_application_install.set_workspace(l_override_workspace);
+  else 
+      apex_application_install.set_workspace(l_workspace);         
+  end if; 
+  commit;  
+
+  -- set app id 
+  if (l_override_app_id != l_app_id and l_override_app_id != get_prop_default('appId')) then
+     apex_application_install.set_application_id(l_override_app_id);
+    l_generate_offset := true;
+  else  
+      apex_application_install.set_application_id(l_app_id);
+  end if; 
+
+ if (l_override_schema != get_prop_default('schema')) then
+    apex_application_install.set_schema(l_override_schema);
+  end if;
+
+  -- set alias 
+  if (l_override_alias != get_prop_default('alias')) then
+    apex_application_install.set_application_alias(l_override_alias);
+   l_generate_offset := true;
+ end if;
+
+  -- generate offset if necessary
+ if (l_generate_offset)  then
+    apex_application_install.generate_offset();
+ end if;
+end;  
+/
+-- sqlcl_checksum  1765472152734
+@f115.sql
+[2025-12-11 17:00:32] INFO [liquibase.changelog] Script executed successfully
+[2025-12-11 17:00:32] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing with the 'SqlCl-jdbc' executor
+[2025-12-11 17:00:32] INFO [oracle.dbtools.raptor.liquibase.executor.jvm.SqlClExecutor execute] Executing sql 
+update WKSP_DEMO.DATABASECHANGELOG_ACTIONS set status = 'RAN' where id = 'INSTALL_115' and status != 'FAILED'  and sequence = (select max(sequence) from WKSP_DEMO.DATABASECHANGELOG_ACTIONS where id = 'INSTALL_115')
+[2025-12-11 17:00:32] INFO [liquibase.changelog] ChangeSet releases/apex/f115/f115.xml::INSTALL_115::SQLCL-Generated ran successfully in 3059ms
+[2025-12-11 17:00:32] INFO [liquibase.util] UPDATE SUMMARY
+[2025-12-11 17:00:32] INFO [liquibase.util] Run:                         11
+[2025-12-11 17:00:32] INFO [liquibase.util] Previously run:               0
+[2025-12-11 17:00:32] INFO [liquibase.util] Filtered out:                 0
+[2025-12-11 17:00:32] INFO [liquibase.util] -------------------------------
+[2025-12-11 17:00:32] INFO [liquibase.util] Total change sets:           11
+[2025-12-11 17:00:32] INFO [liquibase.util] Update summary generated
+[2025-12-11 17:00:32] INFO [liquibase.command] Update command completed successfully.
+[2025-12-11 17:00:32] INFO [liquibase.lockservice] Successfully released change log lock
+[2025-12-11 17:00:32] INFO [liquibase.command] Command execution complete
+[2025-12-11 17:00:32] INFO [oracle.dbtools.raptor.scriptrunner.commands.liquibase.LbCommand handleEvent] Ending LB command: UPDATE
