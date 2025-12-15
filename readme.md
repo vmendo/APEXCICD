@@ -41,7 +41,7 @@ Follow the prompts to authenticate via browser or token.
 
 ## ⚙️ Environment Setup
 
-This demo uses script (`run/setup_env.sh`) to configure all required environment variables:
+This demo uses script [`run/setup_env.sh`](run/setup_env.sh) to configure all required environment variables:
 
 You must edit this file before run the demo and set the values for your demo environment. 
 
