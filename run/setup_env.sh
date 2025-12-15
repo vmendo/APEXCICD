@@ -9,7 +9,7 @@ export GITHUB_USER="vmendo"
 export GITHUB_REPO="apex_ci_cd_demo"
 export GITHUB_URL="https://github.com/$GITHUB_USER/$GITHUB_REPO.git"
 
-export PROJECT_NAME="NIVA"
+export PROJECT_NAME="MyDemo"
 export SCHEMA_NAME="WKSP_DEMO"
 
 export DB_CONNECT_DEV="apex_dev"
