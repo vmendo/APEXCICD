@@ -13,7 +13,7 @@ Before using this demo, make sure the following tools are installed:
 Install the latest SQLcl release from Oracle.
 
 SQLcl requires:
-- **Java 12+** (current releases also support **Java 21**)
+- **Java 17 or Java 21**
 
 Documentation:  
 https://docs.oracle.com/en/database/oracle/sql-developer-command-line/
