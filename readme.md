@@ -153,6 +153,40 @@ Currently unused because DEV and PRO workspaces share the same name.
 
 ---
 
+## 🧹 Reset the Demo
+
+Use `run/clean_demo.sh` to reset the full demo environment.
+
+```bash
+./run/clean_demo.sh
+```
+
+The script runs the cleanup steps in this order:
+
+| Step | Script | Purpose |
+|------|--------|---------|
+| 1 | `run/clean/delete_project.sh` | Deletes the generated SQLcl project folder and optionally cleans the GitHub repository |
+| 2 | `run/clean/cleanup_dev.sh` | Cleans custom demo objects from the DEV database |
+| 3 | `run/clean/cleanup_pro.sh` | Drops demo objects from the PRO database |
+
+The reset scripts load `run/setup_env.sh`, so they use the same project name,
+GitHub repository, SQLcl version, and saved SQLcl connections configured for the
+demo.
+
+You can also run each cleanup step individually:
+
+```bash
+./run/clean/delete_project.sh
+./run/clean/cleanup_dev.sh
+./run/clean/cleanup_pro.sh
+```
+
+Warning: these scripts are destructive. Review `run/setup_env.sh` before
+running them, especially `PROJECT_NAME`, `GITHUB_USER`, `GITHUB_REPO`,
+`DB_CONNECT_DEV`, and `DB_CONNECT_PRO`.
+
+---
+
 ## 📚 Documentation
 
 - SQLcl Projects  
