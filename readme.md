@@ -9,8 +9,37 @@ The demo automates the extraction of schema objects, APEX applications, and meta
 
 Before using this demo, make sure the following tools are installed:
 
-### ✔ 1. SQLcl (latest version)
-Install the latest SQLcl release from Oracle.
+### ✔ 1. SQLcl supported version
+
+Do not use the system default SQLcl `26.1` for this demo.
+
+The demo relies on SQLcl Projects behavior that is compatible with the
+pre-APEXLang SQLcl releases included in this repository under `tools/`.
+SQLcl `26.1` includes APEXLang-related changes that currently break this demo
+workflow.
+
+The supported SQLcl versions are:
+
+| Version | Location |
+|---------|----------|
+| `25.4.1` | `tools/sqlcl-25.4.1.022.0618/bin/sql` |
+| `24.4.1` | `tools/sqlcl_24.4.1.042.1221/bin/sql` |
+
+By default, `run/setup_env.sh` prepends SQLcl `25.4.1` to `PATH`, so all demo
+scripts call the bundled SQLcl instead of the system `sql` executable.
+
+To force SQLcl `24.4.1`, set `SQLCL_VERSION` when running any script:
+
+```bash
+SQLCL_VERSION=24.4.1 ./run/create_project.sh
+SQLCL_VERSION=24.4.1 ./run/create_release.sh base_release 1.0
+```
+
+To use the default SQLcl `25.4.1`, run the scripts normally:
+
+```bash
+./run/create_project.sh
+```
 
 SQLcl requires:
 - **Java 17 or Java 21**
