@@ -25,7 +25,7 @@ ask_yes_default() {
 }
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-source "$SCRIPT_DIR/setup_env.sh"
+source "$SCRIPT_DIR/../setup_env.sh"
 
 DEFAULT_BRANCH="${DEFAULT_BRANCH:-main}"
 
@@ -155,4 +155,3 @@ fi
 
 
 echo -e "${GREEN}🏁 Project ${PROJECT_NAME} deletion process completed.${NC}"
-
